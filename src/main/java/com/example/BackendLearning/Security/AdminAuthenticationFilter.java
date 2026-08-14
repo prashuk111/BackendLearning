@@ -26,8 +26,15 @@ public class AdminAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().equals("/admin/login");
+
+        String path = request.getServletPath();
+
+        return path.equals("/admin/login")
+                || path.startsWith("/swagger-ui/")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/v3/api-docs");
     }
 
 
@@ -72,6 +79,9 @@ public class AdminAuthenticationFilter extends OncePerRequestFilter {
 
 
                 if (valid) {
+                    System.out.println("JWT VALID");
+                    System.out.println("USERNAME: " + username);
+                    System.out.println("AUTHORITIES: " + userDetails.getAuthorities());
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(

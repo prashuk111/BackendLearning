@@ -99,11 +99,21 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
                         .requestMatchers("/admin/login").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.OPTIONS,
+                                "/**"
+                        ).permitAll()
+
                         .anyRequest().authenticated()
                 )
-
                 .userDetailsService(adminService)
 
                 .addFilterBefore(
