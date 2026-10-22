@@ -1,3 +1,4 @@
+
 package com.example.BackendLearning;
 
 import com.example.BackendLearning.Repository.AdminRepository;
@@ -23,33 +24,36 @@ public class AdminInitializer implements CommandLineRunner {
     public void run(String... args) {
         String username = System.getenv("APP_ADMIN_USERNAME");
         String password = System.getenv("APP_ADMIN_PASSWORD");
-
-        if ((username == null || username.isBlank())
-                && (password == null || password.isBlank())) {
-            return;
-        }
+        boolean resetPassword = Boolean.parseBoolean(
+                System.getenv("APP_ADMIN_RESET_PASSWORD"));
 
         if (username == null || username.isBlank()
                 || password == null || password.isBlank()) {
             throw new IllegalStateException(
-                    "Both APP_ADMIN_USERNAME and APP_ADMIN_PASSWORD are required.");
+                    "APP_ADMIN_USERNAME and APP_ADMIN_PASSWORD are required.");
         }
 
         username = username.trim();
 
-        if (adminRepository.findByUsername(username).isPresent()) {
-            System.out.println(
-                    "Admin account already exists. Password was not changed.");
+        var existingAdmin = adminRepository.findByUsername(username);
+
+        if (existingAdmin.isPresent()) {
+            if (resetPassword) {
+                Admin admin = existingAdmin.get();
+                admin.setPassword(passwordEncoder.encode(password));
+                adminRepository.save(admin);
+                System.out.println("Admin password reset successfully.");
+            } else {
+                System.out.println(
+                        "Admin account exists. Password unchanged.");
+            }
             return;
         }
 
         Admin admin = new Admin(
-                username,
-                passwordEncoder.encode(password));
-
+                username, passwordEncoder.encode(password));
         adminRepository.save(admin);
 
-        System.out.println(
-                "Initial application admin account created successfully.");
+        System.out.println("Initial application admin account created.");
     }
 }
